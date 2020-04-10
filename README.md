@@ -9,4 +9,5 @@ Little Application to test magnetometer.
 ## Features (So far)
 
 * WIP
+
   &rarr; possible to receive data via magnetometer sensor of phone and display data on screen.
