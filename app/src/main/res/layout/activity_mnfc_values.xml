@@ -8,14 +8,33 @@
         tools:context=".MnfcValues">
 
     <TextView
-            android:text="Receiving value: "
-            android:layout_width="165dp"
-            android:layout_height="36dp"
-            android:id="@+id/textView"
+            android:text="Receiving bit values: "
+            android:layout_width="350dp"
+            android:layout_height="75dp"
+            android:id="@+id/mnfc_value_display"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="120dp" android:layout_marginStart="120dp"
+            android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="148dp"/>
+            android:layout_marginTop="28dp"/>
+
+    <TextView
+            android:text="Axis values: "
+            android:layout_width="350dp"
+            android:layout_height="75dp"
+            android:id="@+id/axis_value_display"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="116dp"/>
+    <TextView
+            android:text="Field delta values: "
+            android:layout_width="350dp"
+            android:layout_height="75dp"
+            android:id="@+id/magnetic_field_delta"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="29dp" android:layout_marginStart="29dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="203dp"/>
     <Button
             android:text="Home"
             android:layout_width="wrap_content"
@@ -24,5 +43,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="160dp" android:layout_marginStart="160dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="216dp"/>
+            android:layout_marginTop="640dp"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
