@@ -8,17 +8,17 @@
         tools:context=".MnfcValues">
 
     <TextView
-            android:text="Receiving bit values: "
+            android:text="@string/bit_value_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
-            android:id="@+id/mnfc_value_display"
+            android:id="@+id/mnfc_bit_display"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="28dp"/>
 
     <TextView
-            android:text="Axis values: "
+            android:text="@string/axis_field_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
             android:id="@+id/axis_value_display"
@@ -26,17 +26,38 @@
             android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="116dp"/>
+
     <TextView
-            android:text="Field delta values: "
+            android:text="@string/magnetic_values_field_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
-            android:id="@+id/magnetic_field_delta"
+            android:id="@+id/magnetic_field_average"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="29dp" android:layout_marginStart="29dp"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="203dp"/>
+
+    <TextView
+            android:text="@string/message_field_description"
+            android:layout_width="350dp"
+            android:layout_height="75dp"
+            android:id="@+id/show_text"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="292dp"/>
     <Button
-            android:text="Home"
+            android:text="@string/calibration_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="calibrateMnfc"
+            android:id="@+id/calibrate"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="156dp" android:layout_marginStart="156dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="420dp"/>
+    <Button
+            android:text="@string/home_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/back_home_mnfc"
@@ -44,6 +65,7 @@
             android:layout_marginLeft="160dp" android:layout_marginStart="160dp"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="640dp"/>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
