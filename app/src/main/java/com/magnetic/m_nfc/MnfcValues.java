@@ -26,12 +26,14 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
     // Storage for Sensor readings
     private float[] mGeomagnetic = null;
+    private ArrayList<Float> magneticFieldValues = new ArrayList<Float>();
+    private ArrayList<Integer> bytePackets = new ArrayList<Integer>();
     private boolean isHighBit = false;
     private boolean calibration = false;
     private boolean finishedCalibration = false;
     private boolean scanTransmission = false;
-    private int lowerBoarder = 0;
-    private int upperBoarder = 0;
+    private int lowerBorder = 0;
+    private int upperBorder = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,8 +113,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
         TextView axisDisplay = findViewById(R.id.axis_value_display);
         TextView magneticFieldDisplay = findViewById(R.id.magnetic_field_average);
         TextView messageDisplay = findViewById(R.id.show_text);
-        ArrayList<Float> magneticFieldValues = new ArrayList<Float>();
-        ArrayList<Integer> bytePackets = new ArrayList<Integer>();
         int bitValue = 0;
         int currentBoarder = 0;
 
@@ -133,25 +133,24 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
             //Display sensor axis values and total magnetic field strength
             float magneticVectorLength = vectorLength(mGeomagnetic);
-            axisDisplay.setText(String.format(R.string.axis_field_description + "\nX=%.2f mT | Y=%.2f mT | Z=%.2f mT" +
-                    "\nTotal magnetic field: %.2f mT", mGeomagnetic[0], mGeomagnetic[1], mGeomagnetic[2], magneticVectorLength));
+            axisDisplay.setText(String.format(getDisplayTitle("axis")
+                    + "\nX=%.2f mT | Y=%.2f mT | Z=%.2f mT", mGeomagnetic[0], mGeomagnetic[1], mGeomagnetic[2]));
+            magneticFieldDisplay.setText(String.format(getDisplayTitle("str") + "\n%.2f mT", magneticVectorLength));
 
             //Calibrate the Bit boarders to distinguish if the measured bit value
             //is a 1 or a 0
-            //TODO: Debug calibration part, only adds 1 values to ArrayList...
             if(calibration) {
                 magneticFieldValues.add(magneticVectorLength);
                 calibrateBitBoarder(magneticFieldValues, messageDisplay);
-                Log.d(TAG_MAIN, String.valueOf(magneticFieldValues.size()));
+                //Log.d(TAG_MAIN, String.valueOf(magneticFieldValues.size()));
             }
 
             //Assigns M-NFC values according to set boundaries from calibration process.
             if(scanTransmission) {
-                bitValue = bitTranslation(magneticVectorLength, lowerBoarder, upperBoarder);
+                bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
                 bytePackets.add(bitValue);
             }
-            mnfcDisplay.setText(String.format(R.string.bit_value_description +"%1d", bitValue));
-
+            mnfcDisplay.setText(String.format(getDisplayTitle("byte") +"%1d", bitValue));
             //Log.d(TAG_MAGNET, "mx : "+mGeomagnetic[0]+" my : "+mGeomagnetic[1]+" mz : "+mGeomagnetic[2]);
 
         }
@@ -161,12 +160,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // N/A
-    }
-
-    //Calculating a vectors length
-    private float vectorLength(float[] magneticV){
-        //The squareroot of the sum of each squared value
-        return  (float) Math.sqrt(magneticV[0]*magneticV[0] + magneticV[1]*magneticV[1] + magneticV[2]*magneticV[2]);
     }
 
     //Scanns receiving magnetic field strength and returns bit value according to high/low magnetic field strength
@@ -198,20 +191,31 @@ public class MnfcValues extends Activity implements SensorEventListener {
             isHighBit = false;
             calibration = false;
             finishedCalibration = false;
-            view.setText(R.string.message_field_description + "\nCalibration done.");
+            view.setText(getDisplayTitle("mes") + "\n");
+            view.setText(String.format(getDisplayTitle("mes") + " Calibration done. \nValues for bit recognition " +
+                    "\nUpper border -> %2d \nLower border -> %2d", upperBorder, lowerBorder));
         } else if(!isHighBit && values.size()> 50) {
-            view.setText(R.string.message_field_description + "\nCalibrate lower boarder...");
+            view.setText(getDisplayTitle("mes") + "\nCalibrate lower boarder...");
             values.remove(0);
-            lowerBoarder = calculateAverageMagneticField(values);
+            lowerBorder = calculateAverageMagneticField(values);
             //Checking if lowerBoarder is set.
             //Otherwise let assign lowerBoarder again
-            isHighBit = ((upperBoarder - lowerBoarder) < 0);
+            isHighBit = ((upperBorder - lowerBorder) < 0);
         } else if (isHighBit && values.size() > 50){
-            view.setText(R.string.message_field_description + "\nCalibrate upper boarder...");
+            view.setText(getDisplayTitle("mes") + "\nCalibrate upper boarder...");
             values.remove(0);
-            upperBoarder = calculateAverageMagneticField(values);
-            finishedCalibration = ((upperBoarder - lowerBoarder) > 3);
+            upperBorder = calculateAverageMagneticField(values);
+            finishedCalibration = ((upperBorder - lowerBorder) > 3);
         }
+    }
+
+
+    // region helper methods
+
+    //Calculating a vectors length
+    private float vectorLength(float[] magneticV){
+        //The squareroot of the sum of each squared value
+        return  (float) Math.sqrt(magneticV[0]*magneticV[0] + magneticV[1]*magneticV[1] + magneticV[2]*magneticV[2]);
     }
 
     //Calculates average of a set of samples from the sensor to determine upper and lower boundaries
@@ -229,5 +233,26 @@ public class MnfcValues extends Activity implements SensorEventListener {
         return (int) sum;
     }
 
+    //picking string value for Textfield title text
+    private String getDisplayTitle(String title){
 
+        String t = "";
+        switch (title){
+            case "axis":
+                t = getString(R.string.axis_field_description);
+                break;
+            case "str":
+                t = getString(R.string.magnetic_values_field_description);
+                break;
+            case "byte":
+                t = getString(R.string.bit_value_description);
+                break;
+            case  "mes":
+                t = getString(R.string.message_field_description);
+                break;
+        }
+        return t;
+    }
+
+    // endregion
 }

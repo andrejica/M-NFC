@@ -12,40 +12,46 @@
             android:layout_width="350dp"
             android:layout_height="75dp"
             android:id="@+id/mnfc_bit_display"
+            android:background="@drawable/textview_border"
+            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="28dp"/>
-
+            android:layout_marginTop="220dp"/>
     <TextView
             android:text="@string/axis_field_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
             android:id="@+id/axis_value_display"
+            android:background="@drawable/textview_border"
+            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="116dp"/>
-
+            android:layout_marginTop="40dp"/>
     <TextView
             android:text="@string/magnetic_values_field_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
             android:id="@+id/magnetic_field_average"
+            android:background="@drawable/textview_border"
+            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="29dp" android:layout_marginStart="29dp"
+            android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="203dp"/>
+            android:layout_marginTop="128dp"/>
 
     <TextView
             android:text="@string/message_field_description"
             android:layout_width="350dp"
             android:layout_height="75dp"
             android:id="@+id/show_text"
+            android:background="@drawable/textview_border"
+            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="28dp" android:layout_marginStart="28dp"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="292dp"/>
+            android:layout_marginTop="312dp"/>
     <Button
             android:text="@string/calibration_button"
             android:layout_width="wrap_content"
