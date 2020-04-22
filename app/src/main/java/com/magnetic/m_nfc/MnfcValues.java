@@ -18,6 +18,9 @@ public class MnfcValues extends Activity implements SensorEventListener {
     private static final String TAG_MAGNET = "Magnet";
     private static final String TAG_MAIN = "MainActivity";
 
+    private TextView messageDisplay;
+    private TextView set_val;
+
     //private CalibrationServiceHandlerThread handlerThread = new CalibrationServiceHandlerThread();
 
     // Sensors & SensorManager
@@ -39,7 +42,8 @@ public class MnfcValues extends Activity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mnfc_values);
-
+        messageDisplay = findViewById(R.id.show_text);
+        set_val = findViewById(R.id.set_values);
         //handlerThread.start();
 
         // Get a reference to the SensorManager
@@ -73,6 +77,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
     //Starts a service to calibrate the phone for transmission
     public void calibrateMnfc(View view){
         calibration = true;
+        messageDisplay.setText(getDisplayTitle("mes") + " \nStarting calibration!");
 //        final Button calibrate = findViewById(R.id.calibrate);
 //        calibrate.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -112,7 +117,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
         TextView mnfcDisplay = findViewById(R.id.mnfc_bit_display);
         TextView axisDisplay = findViewById(R.id.axis_value_display);
         TextView magneticFieldDisplay = findViewById(R.id.magnetic_field_average);
-        TextView messageDisplay = findViewById(R.id.show_text);
+        //TextView messageDisplay = findViewById(R.id.show_text);
         int bitValue = 0;
         int currentBoarder = 0;
 
@@ -134,15 +139,15 @@ public class MnfcValues extends Activity implements SensorEventListener {
             //Display sensor axis values and total magnetic field strength
             float magneticVectorLength = vectorLength(mGeomagnetic);
             axisDisplay.setText(String.format(getDisplayTitle("axis")
-                    + "\nX=%.2f mT | Y=%.2f mT | Z=%.2f mT", mGeomagnetic[0], mGeomagnetic[1], mGeomagnetic[2]));
-            magneticFieldDisplay.setText(String.format(getDisplayTitle("str") + "\n%.2f mT", magneticVectorLength));
+                    + "\n\n\tX=%.2f mT | Y=%.2f mT | Z=%.2f mT", mGeomagnetic[0], mGeomagnetic[1], mGeomagnetic[2]));
+            magneticFieldDisplay.setText(String.format(getDisplayTitle("str") + "\n\n\t%.2f mT", magneticVectorLength));
 
             //Calibrate the Bit boarders to distinguish if the measured bit value
             //is a 1 or a 0
             if(calibration) {
                 magneticFieldValues.add(magneticVectorLength);
                 calibrateBitBoarder(magneticFieldValues, messageDisplay);
-                //Log.d(TAG_MAIN, String.valueOf(magneticFieldValues.size()));
+                Log.d(TAG_MAIN, String.valueOf(magneticFieldValues.size()));
             }
 
             //Assigns M-NFC values according to set boundaries from calibration process.
@@ -150,7 +155,8 @@ public class MnfcValues extends Activity implements SensorEventListener {
                 bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
                 bytePackets.add(bitValue);
             }
-            mnfcDisplay.setText(String.format(getDisplayTitle("byte") +"%1d", bitValue));
+            bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
+            mnfcDisplay.setText(String.format(getDisplayTitle("byte") +"\n\n\t%1d", bitValue));
             //Log.d(TAG_MAGNET, "mx : "+mGeomagnetic[0]+" my : "+mGeomagnetic[1]+" mz : "+mGeomagnetic[2]);
 
         }
@@ -164,19 +170,19 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
     //Scanns receiving magnetic field strength and returns bit value according to high/low magnetic field strength
     //Returns -1 as error if couldn't recognise bit
-    private int bitTranslation(float currentMagneticField, int lowBoarder, int highBoarder){
+    private int bitTranslation(float currentMagneticField, int lowBorder, int highBorder){
 
-        int bitValue;
-        if(currentMagneticField >= (highBoarder-2) && currentMagneticField <= (highBoarder+2)){
-            bitValue = 1;
+        int bitVal;
+        if(currentMagneticField >= (highBorder-4) && currentMagneticField <= (highBorder+4)){
+            bitVal = 1;
         }
-        else if(currentMagneticField >= (lowBoarder-2) && currentMagneticField <= (lowBoarder+2)){
-            bitValue = 0;
+        else if(currentMagneticField >= (lowBorder-4) && currentMagneticField <= (lowBorder+4)){
+            bitVal = 0;
         } else{
-            bitValue = -1;
+            bitVal = -1;
         }
 
-        return bitValue;
+        return bitVal;
     }
 
     //Checks values from ArrayList and sets upper and lower boarder
@@ -193,19 +199,25 @@ public class MnfcValues extends Activity implements SensorEventListener {
             finishedCalibration = false;
             view.setText(getDisplayTitle("mes") + "\n");
             view.setText(String.format(getDisplayTitle("mes") + " Calibration done. \nValues for bit recognition " +
-                    "\nUpper border -> %2d \nLower border -> %2d", upperBorder, lowerBorder));
+                    "\n\t\tUpper border -> %2d mT \n\t\tLower border -> %2d mT", upperBorder, lowerBorder));
+            set_val.setText(String.format(getDisplayTitle("set") +
+                    " \n\tBit value 0 -> %1d mT \n\tBit value 1 -> %1d mT", lowerBorder, upperBorder));
         } else if(!isHighBit && values.size()> 50) {
-            view.setText(getDisplayTitle("mes") + "\nCalibrate lower boarder...");
+            view.setText(getDisplayTitle("mes") + "\n\tCalibrate lower border...");
             values.remove(0);
             lowerBorder = calculateAverageMagneticField(values);
             //Checking if lowerBoarder is set.
             //Otherwise let assign lowerBoarder again
-            isHighBit = ((upperBorder - lowerBorder) < 0);
+            if(Math.abs(upperBorder - lowerBorder) > 0) {
+                isHighBit = true;
+                values.clear();
+                view.setText(getDisplayTitle("mes") + "\n\tCalibration lower border done!");
+            }
         } else if (isHighBit && values.size() > 50){
-            view.setText(getDisplayTitle("mes") + "\nCalibrate upper boarder...");
+            view.setText(getDisplayTitle("mes") + "\n\tCalibrate upper border...");
             values.remove(0);
             upperBorder = calculateAverageMagneticField(values);
-            finishedCalibration = ((upperBorder - lowerBorder) > 3);
+            finishedCalibration = (Math.abs(upperBorder - lowerBorder) > 6);
         }
     }
 
@@ -249,6 +261,9 @@ public class MnfcValues extends Activity implements SensorEventListener {
                 break;
             case  "mes":
                 t = getString(R.string.message_field_description);
+                break;
+            case "set":
+                t = getString(R.string.set_value);
                 break;
         }
         return t;

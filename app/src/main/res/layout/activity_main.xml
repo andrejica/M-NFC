@@ -12,15 +12,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/startMnfc"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="148dp" android:layout_marginStart="148dp"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="216dp"/>
+            app:layout_constraintTop_toBottomOf="@+id/title_mnfc"
+            android:layout_marginTop="80dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"/>
     <TextView
             android:text="Magnetic-NFC"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/title_mnfc" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="160dp"
-            android:layout_marginStart="160dp" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="140dp"/>
+            android:id="@+id/title_mnfc"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="148dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
