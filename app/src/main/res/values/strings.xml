@@ -6,5 +6,6 @@
     <string name="message_field_description">Message: </string>
     <string name="set_value">Set values: </string>
     <string name="calibration_button">Calibrate</string>
+    <string name="mnfc_button">Start Scan</string>
     <string name="home_button">Home</string>
 </resources>

@@ -73,9 +73,22 @@
             android:layout_height="wrap_content"
             android:onClick="calibrateMnfc"
             android:id="@+id/calibrate"
-            app:layout_constraintStart_toStartOf="@+id/set_values"
-            app:layout_constraintTop_toBottomOf="@+id/set_values"
-            android:layout_marginTop="50dp"/>
+            app:layout_constraintEnd_toStartOf="@+id/startScan"
+            android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/startScan"/>
+
+    <Button
+            android:text="@string/mnfc_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="startScanning"
+            android:id="@+id/startScan"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/back_home_mnfc"
+            android:layout_marginBottom="20dp"/>
+
     <Button
             android:text="@string/home_button"
             android:layout_width="wrap_content"
