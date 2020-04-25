@@ -25,6 +25,7 @@ import java.util.List;
 public class MnfcValues extends Activity implements SensorEventListener {
     private static final String TAG_MAGNET = "Magnet";
     private static final String TAG_MAIN = "MainActivity";
+    public static final int MAX_CALIBRATION_VALUES = 50;
 
     private TextView messageDisplay;
     private TextView set_val;
@@ -212,6 +213,12 @@ public class MnfcValues extends Activity implements SensorEventListener {
     @SuppressLint("SetTextI18n")
     private void calibrateBitBorder(ArrayList<Float> values, TextView view){
 
+        if(!isHighBit){
+            view.setText(getDisplayTitle("mes") + "\n\tCalibrate lower border..." + showCalibrationInPercent(values));
+        } else {
+            view.setText(getDisplayTitle("mes") + "\n\tCalibrate upper border..." + showCalibrationInPercent(values));
+        }
+
         int averageNow = calculateAverageMagneticField(values);
         if(finishedCalibration && upperBorder != 0 && lowerBorder != 0){
             //Stop the calibration if values are set and clears ArrayList
@@ -225,9 +232,8 @@ public class MnfcValues extends Activity implements SensorEventListener {
             set_val.setText(String.format(getDisplayTitle("set") +
                     " \n\tBit value 0 -> %1d mT \n\tBit value 1 -> %1d mT", lowerBorder, upperBorder));
         } else if(!isHighBit && values.size()> 50) {
-            view.setText(getDisplayTitle("mes") + "\n\tCalibrate lower border...");
             values.remove(0);
-            lowerBorder = calculateAverageMagneticField(values);
+            lowerBorder = averageNow;
             //Checking if lowerBoarder is set.
             //Otherwise let assign lowerBoarder again
             if(Math.abs(upperBorder - lowerBorder) > 0) {
@@ -236,7 +242,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
                 view.setText(getDisplayTitle("mes") + "\n\tCalibration lower border done!");
             }
         } else if (isHighBit && (averageNow > 0) && values.size() > 50){
-            view.setText(getDisplayTitle("mes") + "\n\tCalibrate upper border...");
             values.remove(0);
             upperBorder = calculateAverageMagneticField(values);
             finishedCalibration = (Math.abs(upperBorder - lowerBorder) > 6);
@@ -260,6 +265,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
 
         Log.d("BitSet", "Bit Nr. " + counter + " Bit value " + testByte.get(counter));
+        messageDisplay.setText(getDisplayTitle("mes") + "\n\tBit Nr. " + counter + " Bit value " + testByte.get(counter));
         //Log.d("Byte[]",  test[0] + "");
         //Log.d("BitSet byte valueOf",testByte.toString() + testByte.size());
         //Log.d("Back to Text", ultimateResult);
@@ -338,8 +344,13 @@ public class MnfcValues extends Activity implements SensorEventListener {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void test(){
-
+    //Showing calibration progress in percent
+    private String showCalibrationInPercent(ArrayList<Float> values){
+        float percent = (float) values.size() / MAX_CALIBRATION_VALUES;
+        if(percent > 1){
+            percent = 1;
+        }
+        return String.format("\n\tprogress: %.1f", (percent*100)) + "%";
     }
 
     // endregion
