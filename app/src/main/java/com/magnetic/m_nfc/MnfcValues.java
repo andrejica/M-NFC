@@ -44,6 +44,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
     private boolean calibration = false;
     private boolean finishedCalibration = false;
     private boolean scanTransmission = false;
+    private int counter = 0;
     private int lowerBorder = 0;
     private int upperBorder = 0;
 
@@ -243,13 +244,11 @@ public class MnfcValues extends Activity implements SensorEventListener {
     }
 
     private void scanAndTranslateMnfc(){
-        BitSet nft = new BitSet(8);
-        nft.set(0b11000100);
-        nft.set(0b1111);
+        //BitSet nft = new BitSet(8);
         BitSet testByte;
 
         //Actual way to parse from String - byte[] - BitSet - byte[] - String
-        String littleText = "C";
+        String littleText = "Hello world!";
         byte[] test = littleText.getBytes(StandardCharsets.UTF_8);
         //byte result = Byte.parseByte("4");
 
@@ -259,11 +258,16 @@ public class MnfcValues extends Activity implements SensorEventListener {
         String ultimateResult = new String(result, StandardCharsets.UTF_8);
 
 
-        Log.d("BitSet", nft.toString() + " " + "Bit: " + nft.get(0, nft.size()-1) + nft.size());
-        Log.d("Byte[]",  test[0] + "");
-        Log.d("BitSet byte valueOf",testByte.toString() + testByte.size());
-        Log.d("Back to Text", ultimateResult);
-        scanTransmission = false;
+
+        Log.d("BitSet", "Bit Nr. " + counter + " Bit value " + testByte.get(counter));
+        //Log.d("Byte[]",  test[0] + "");
+        //Log.d("BitSet byte valueOf",testByte.toString() + testByte.size());
+        //Log.d("Back to Text", ultimateResult);
+        counter++;
+        if(counter >= testByte.size()) {
+            scanTransmission = false;
+            counter = 0;
+        }
     }
 
 
