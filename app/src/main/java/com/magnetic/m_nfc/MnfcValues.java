@@ -139,7 +139,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
         TextView axisDisplay = findViewById(R.id.axis_value_display);
         TextView magneticFieldDisplay = findViewById(R.id.magnetic_field_average);
         //TextView messageDisplay = findViewById(R.id.show_text);
-        int bitValue = 0;
+        int bitValue;
         int currentBoarder = 0;
 
 
@@ -189,7 +189,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
         // N/A
     }
 
-    //Scanns receiving magnetic field strength and returns bit value according to high/low magnetic field strength
+    //Scans receiving magnetic field strength and returns bit value according to high/low magnetic field strength
     //Returns -1 as error if couldn't recognise bit
     private int bitTranslation(float currentMagneticField, int lowBorder, int highBorder){
 
@@ -248,6 +248,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
         }
     }
 
+    //TODO: Let scanned values store and translate to Text back
     private void scanAndTranslateMnfc(){
         //BitSet nft = new BitSet(8);
         BitSet testByte;
@@ -324,7 +325,7 @@ public class MnfcValues extends Activity implements SensorEventListener {
         return t;
     }
 
-    //TODO: make dummy message to test the NDEF Message methods
+    //not necessary to make
     private void dummyNdefMessage(ArrayList<ArrayList<Integer>> message){
 
         //Flags for the record header. Describes the NDEFrecord (1 byte)
