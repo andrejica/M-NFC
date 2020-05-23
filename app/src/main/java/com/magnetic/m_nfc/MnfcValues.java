@@ -8,14 +8,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.nfc.tech.Ndef;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;;
-import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,15 +31,15 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
     private Ndef reader;
 
-    //private CalibrationServiceHandlerThread handlerThread = new CalibrationServiceHandlerThread();
-
     // Sensors & SensorManager
     private Sensor magnetometer;
     private SensorManager mSensorManager;
 
     // Storage for Sensor readings
     private float[] mGeomagnetic = null;
-    private ArrayList<Float> magneticFieldValues = new ArrayList<Float>();
+    private ArrayList<Float> magneticFieldValues = new ArrayList<>();
+    private BitSet messageAsBits = new BitSet();
+    private int sumOfBits = 0;
     private boolean isHighBit = false;
     private boolean calibration = false;
     private boolean finishedCalibration = false;
@@ -55,7 +54,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_mnfc_values);
         messageDisplay = findViewById(R.id.show_text);
         set_val = findViewById(R.id.set_values);
-        //handlerThread.start();
 
         // Get a reference to the SensorManager
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -83,7 +81,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
             public void onClick(View v) {
                 generateTextForToast("M-NFC going to sleep...");
                 finish();
-                //handlerThread.quit();
             }
         });
     }
@@ -92,17 +89,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
     public void calibrateMnfc(View view){
         calibration = true;
         messageDisplay.setText(getDisplayTitle("mes") + " \nStarting calibration!");
-//        final Button calibrate = findViewById(R.id.calibrate);
-//        calibrate.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Message msg = Message.obtain();
-//                msg.what = 1;
-//                msg.arg1 = 0;
-//                msg.obj = "calibrate Magnet";
-//                handlerThread.getHandler().post(new CalibrationServiceHandlerThread());
-//            }
-//        });
     }
 
     public void startScanning(View view){
@@ -138,13 +124,10 @@ public class MnfcValues extends Activity implements SensorEventListener {
         TextView mnfcDisplay = findViewById(R.id.mnfc_bit_display);
         TextView axisDisplay = findViewById(R.id.axis_value_display);
         TextView magneticFieldDisplay = findViewById(R.id.magnetic_field_average);
-        //TextView messageDisplay = findViewById(R.id.show_text);
         int bitValue;
-        int currentBoarder = 0;
 
 
         // Acquire magnetometer event data
-
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
 
             mGeomagnetic = new float[3];
@@ -154,7 +137,6 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
         // If we have readings from the sensor then
         // update the display.
-
         if (mGeomagnetic != null) {
 
             //Display sensor axis values and total magnetic field strength
@@ -173,11 +155,11 @@ public class MnfcValues extends Activity implements SensorEventListener {
 
             //Assigns M-NFC values according to set boundaries from calibration process.
             if(scanTransmission) {
-                //bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
-                scanAndTranslateMnfc();
+                bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
+                magneticFieldValues.add(magneticVectorLength);
+                mnfcDisplay.setText(String.format(getDisplayTitle("byte") +"\n\n\t%1d", bitValue));
+                scanAndTranslateMnfc(bitValue, magneticFieldValues, messageAsBits);
             }
-            bitValue = bitTranslation(magneticVectorLength, lowerBorder, upperBorder);
-            mnfcDisplay.setText(String.format(getDisplayTitle("byte") +"\n\n\t%1d", bitValue));
             //Log.d(TAG_MAGNET, "mx : "+mGeomagnetic[0]+" my : "+mGeomagnetic[1]+" mz : "+mGeomagnetic[2]);
 
         }
@@ -194,10 +176,10 @@ public class MnfcValues extends Activity implements SensorEventListener {
     private int bitTranslation(float currentMagneticField, int lowBorder, int highBorder){
 
         int bitVal;
-        if(currentMagneticField >= (highBorder-4) && currentMagneticField <= (highBorder+4)){
+        if(currentMagneticField >= (highBorder-2) && currentMagneticField <= (highBorder+2)){
             bitVal = 1;
         }
-        else if(currentMagneticField >= (lowBorder-4) && currentMagneticField <= (lowBorder+4)){
+        else if(currentMagneticField >= (lowBorder-2) && currentMagneticField <= (lowBorder+2)){
             bitVal = 0;
         }
         else{
@@ -244,36 +226,54 @@ public class MnfcValues extends Activity implements SensorEventListener {
         } else if (isHighBit && (averageNow > 0) && values.size() > 50){
             values.remove(0);
             upperBorder = calculateAverageMagneticField(values);
-            finishedCalibration = (Math.abs(upperBorder - lowerBorder) > 6);
+            finishedCalibration = (Math.abs(upperBorder - lowerBorder) > 4);
         }
     }
 
-    //TODO: Let scanned values store and translate to Text back
-    private void scanAndTranslateMnfc(){
-        //BitSet nft = new BitSet(8);
-        BitSet testByte;
+    /*
+    checks value of the registered Bit at the moment.
+    and adds the result to an overall evaluation to a variable.
+    if enough magnetic-field values are checked it then stores the
+    estimated Bit value from the variable "sumOfBits" into a list as a logical "1" or "0".
+    Which later it translates the message back.
+    */
+    private void scanAndTranslateMnfc(int bitVal, ArrayList<Float> magneticList, BitSet message){
 
-        //Actual way to parse from String - byte[] - BitSet - byte[] - String
-        String littleText = "Hello world!";
-        byte[] test = littleText.getBytes(StandardCharsets.UTF_8);
-        //byte result = Byte.parseByte("4");
+        //Adds up to 5 values into "sumOfBits"
+        if(bitVal == 1){
+            sumOfBits++;
+        } else if(bitVal == 0){
+            sumOfBits--;
+        }
 
-        testByte = BitSet.valueOf(test);
+        //Positive "sumOfBits" leads to a logical 1
+        //Negative "sumOfBits" is a logical 0
+        if(magneticList.size() >= 10){
 
-        byte[] result = testByte.toByteArray();
-        String ultimateResult = new String(result, StandardCharsets.UTF_8);
+            if(sumOfBits > 0){
+                message.set(counter, true);
+            } else if(sumOfBits < 0){
+                message.set(counter, false);
+            }
 
+            magneticList.clear();
+            sumOfBits = 0;
+            counter++;
+            Log.d("BitSet Value", String.valueOf(message.get(counter)));
+        }
 
+        //Translates message from Bits into string Text
+        //and displays on the App screen
+        if(counter >= 64){
+            byte[] result = message.toByteArray();
+            String receivedMessage = new String(result, StandardCharsets.UTF_8);
 
-        Log.d("BitSet", "Bit Nr. " + counter + " Bit value " + testByte.get(counter));
-        messageDisplay.setText(getDisplayTitle("mes") + "\n\tBit Nr. " + counter + " Bit value " + testByte.get(counter));
-        //Log.d("Byte[]",  test[0] + "");
-        //Log.d("BitSet byte valueOf",testByte.toString() + testByte.size());
-        //Log.d("Back to Text", ultimateResult);
-        counter++;
-        if(counter >= testByte.size()) {
-            scanTransmission = false;
+            messageDisplay.setText(getDisplayTitle("mes") +
+                    "\nMessage received!" + "\n\tYour message: " + receivedMessage +
+                    "\n\t>>received via M-NFC<<");
             counter = 0;
+            scanTransmission = false;
+
         }
     }
 
@@ -283,7 +283,8 @@ public class MnfcValues extends Activity implements SensorEventListener {
     //Calculating a vectors length
     private float vectorLength(float[] magneticV){
         //The squareroot of the sum of each squared value
-        return  (float) Math.sqrt(magneticV[0]*magneticV[0] + magneticV[1]*magneticV[1] + magneticV[2]*magneticV[2]);
+        return  (float) Math.sqrt((magneticV[0]*magneticV[0])/9 + (magneticV[1]*magneticV[1])/9 +
+                (magneticV[2]*magneticV[2])/9);
     }
 
     //Calculates average of a set of samples from the sensor to determine upper and lower boundaries
